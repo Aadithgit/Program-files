@@ -1,8 +1,8 @@
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 class Book {
     private int id;
@@ -16,7 +16,7 @@ class Book {
         this.title = title;
         this.author = author;
         this.ISBN = ISBN;
-        this.available = true; 
+        this.available = true;
     }
 
     public int getId() {
@@ -51,10 +51,15 @@ class Book {
 class Library {
     private List<Book> books;
     private Map<String, Book> titleToBookMap;
+    private int nextBookId = 1;
 
     public Library() {
         books = new ArrayList<>();
         titleToBookMap = new HashMap<>();
+    }
+
+    public int generateBookId() {
+        return nextBookId++;
     }
 
     public void addBook(Book book) {
@@ -65,6 +70,19 @@ class Library {
     public void removeBook(Book book) {
         if (books.remove(book)) {
             titleToBookMap.remove(book.getTitle());
+        }
+    }
+
+    public void removeBookById(int bookId) {
+        Book bookToRemove = null;
+        for (Book book : books) {
+            if (book.getId() == bookId) {
+                bookToRemove = book;
+                break;
+            }
+        }
+        if (bookToRemove != null) {
+            removeBook(bookToRemove);
         }
     }
 
@@ -98,29 +116,47 @@ class Library {
 public class Libmng {
     public static void main(String[] args) {
         Library library = new Library();
+        Scanner scanner = new Scanner(System.in);
 
-        
-        Book book1 = new Book(1, "Book A", "Author A", "ISBN111");
-        Book book2 = new Book(2, "Book B", "Author B", "ISBN222");
-        library.addBook(book1);
-        library.addBook(book2);
+        while (true) {
+            System.out.print("Enter book title (or 'quit' to exit): ");
+            String title = scanner.nextLine();
+            if (title.equals("quit")) {
+                break;
+            }
 
-        
+            System.out.print("Enter book author: ");
+            String author = scanner.nextLine();
+
+            System.out.print("Enter book ISBN: ");
+            String isbn = scanner.nextLine();
+
+            int bookId = library.generateBookId();
+            Book book = new Book(bookId, title, author, isbn);
+            library.addBook(book);
+
+            System.out.println("Book added with ID: " + bookId);
+        }
+
         library.displayAvailableBooks();
 
-        
-        library.updateAvailability(1, false);
+        System.out.print("Enter the ID of the book to remove: ");
+        int bookIdToRemove = scanner.nextInt();
+        library.removeBookById(bookIdToRemove);
 
-        
         library.displayAvailableBooks();
 
-        
-        Book foundBook = library.searchByTitle("Book A");
+        scanner.nextLine(); 
+        System.out.print("Enter the title to search for: ");
+        String searchTitle = scanner.nextLine();
+        Book foundBook = library.searchByTitle(searchTitle);
+
         if (foundBook != null) {
             System.out.println("Found book: " + foundBook.getTitle());
         } else {
             System.out.println("Book not found.");
         }
+
+        scanner.close();
     }
 }
-
